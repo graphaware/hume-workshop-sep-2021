@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Workflow
+metadata:
+  name: workflow-neo4j-basic
+spec:
+  label: 'Workflow Neo4j Basic'
+  components:
+    - name: Neo4j Reader
+      type: "#Hume.Orchestra.DataSource.Neo4jReader"
+      config:
+        query: MATCH (n:Person) RETURN n
+      resource:
+        selector:
+          name: neo4j-movies
+      to:
+        - MessageTransformer
+    - name: MessageTransformer
+      type: "#Hume.Orchestra.Processor.MessageTransformer"
+      config:
+        transformer_script: |
+          body['source'] = 'neo4j-movies'
+
+          return body
+      to:
+        - Observer
+    - name: Observer
+      type: "#Hume.Orchestra.Monitor.Observer"

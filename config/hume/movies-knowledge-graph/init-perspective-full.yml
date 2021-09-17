@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Perspective
+metadata:
+  name: full-perspective
+spec:
+  label: Full Perspective
+  resource:
+    selector:
+      name: neo4j-movies
+  synced: true

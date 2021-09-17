@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: EcosystemResource
+metadata:
+  name: neo4j-movies
+spec:
+  fqn: Hume.Orchestra.Resource.Neo4j
+  parameters:
+    - name: host
+      value: neo4j
+    - name: port
+      value: 7687
+    - name: user
+      value: neo4j
+    - name: password
+      value: password
+    - name: database
+      value: movies

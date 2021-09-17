@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Action
+metadata:
+  name: movies-show-matrix-actors
+spec:
+  label: 'Show Matrix Actors'
+  query: |
+    MATCH path=(n:Movie {title: 'The Matrix'})<-[:ACTED_IN]-(p:Person)
+    RETURN path
+    LIMIT 20
+  scope: GLOBAL
+  returnType: GRAPH

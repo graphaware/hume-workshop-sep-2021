@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: KnowledgeGraph
+metadata:
+  name: 'movies-knowledge-graph'
+spec:
+  label: Movies Knowledge Graph
+  perspectives:
+    - full-perspective
+  workflows:
+    - workflow-neo4j-basic
+  actions:
+    - movies-show-matrix-actors
+  schema:
+    classes:
+      - label: Movie
+        color: '#6200EA'
+        icon: mdi-movie
+        attributes:
+          - label: title
+            type: STRING
+            full_text: true
+          - label: released
+            type: INTEGER
+      - label: Person
+        color: '#26A69A'
+        icon: person
+        attributes:
+          - label: name
+            type: STRING
+            full_text: true
+    relationships:
+      - label: ACTED_IN
+        start: Person
+        end: Movie
+      - label: DIRECTED
+        start: Person
+        end: Movie
+      - label: PRODUCED
+        start: Person
+        end: Movie
