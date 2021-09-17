@@ -7,13 +7,16 @@ services:
       - "${NEO4J_BOLT_PORT:-7687}:7687"
     environment:
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      - NEO4J_AUTH=neo4j/password
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
       - NEO4J_dbms_memory_heap_maxSize=4G
       - NEO4J_dbms_connector_bolt_advertised__address=${HUME_ADVERTISED_ADDRESS:-localhost}:${NEO4J_PORT:-7687}
       - NEO4JLABS_PLUGINS=["apoc","graph-data-science"]
     volumes:
       - "hume_neo4j_data:/data"
       - "hume_neo4j_plugins:/plugins"
+    profiles:
+      - hume
+      - neo4j
   neo4j-config-cli:
     image: graphaware/neo4j-config-cli:1.3.0
     environment:
@@ -23,6 +26,9 @@ services:
       - IMPORT_PATH=/config
     volumes:
       - "./config/neo4j:/config"
+    profiles:
+      - hume
+      - neo4j
   orchestra:
     image: docker.graphaware.com/public/hume-orchestra:${HUME_VERSION}
     ports:
@@ -30,6 +36,8 @@ services:
       - 8666:8666
     volumes:
       - ${HUME_PUBLIC_DIR:-./public}:/data
+    profiles:
+      - hume
   postgres:
     image: postgres:12.0
     environment:
@@ -37,6 +45,8 @@ services:
       POSTGRES_USER: ${HUME_DB_USER:-hume}
     ports:
       - 5432:5432
+    profiles:
+      - hume
   api:
     image: docker.graphaware.com/public/hume-api:${HUME_VERSION}
     ports:
@@ -57,13 +67,50 @@ services:
       - com.hume.core.security.license.b64=AFswWTA4BgkqhkiG9w0BBQwwKwQU4wDOUuFh2S4yfjsEKVAQz0qbFCMCAhAAAgEQMAwGCCqGSIb3DQIJBQAwHQYJYIZIAWUDBAECBBBtBKKRk2LNjEm4nyRl7HIsiGweNfVILaOCYgTp8A+G05kE3iV0zQXHLqG6eHiToA1+p88YNfI15/fzm/h62lffUuSE4izX3yOSAgZcLUXxcFaWqJJG5mz42Ny+WrP9O18fCGZVmRRQX24+U1Ol1RnydWDFEh5SJ0Qw5nzcYMktSRGz+OrQmIRJyEhhzJH+pnoaIqqFH0eaRwkbDKctEGWjRv03VW25CRRNog+yRQ4wOePOAQUx1Zp7fZvI6QyvRCQq1Nif6LzNoOSbzCte5VMsXcEbFGPcrBQewnAASgRl7K7x8xVr847gOKrfF+ZBwg/IeJ35h4RgLWqDk+iJ6t7BnXO6ugp/Nb26R66GwblwKllMV2IrxuGOe4PZd278O4q/iM1WYDudltaF201Krjw1
     volumes: 
       - ./config/hume:/init
+    profiles:
+      - hume
   web:
     image: docker.graphaware.com/public/hume-web:${HUME_VERSION}
     environment:
       - HUME_API_URL=http://localhost:8080
     ports:
       - "${HUME_FRONT_PORT:-8081}:8081"
+    profiles:
+      - hume
+  # Elasticsearch Specifics
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - "elasticsearch_data:/usr/share/elasticsearch/data"
+    ports:
+      - 9200:9200
+      - 9300:9300
+    profiles:
+      - elastic
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.1
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    profiles:
+      - elastic
 volumes:
   hume_postgres_data:
   hume_neo4j_data:
   hume_neo4j_plugins:
+  elasticsearch_data:
