@@ -6,7 +6,7 @@
 
 Hume and Neo4j will be up and running : 
 
-- Hume : localhost:8081 , login : `user@hume.ga` / password : `password`
+- Hume : localhost:8081 , login : `admin@hume.ga` / password : `password`
 - Neo4j : localhost:7474, login : `neo4j` / password : `password`
 
 Neo4j and Hume will be populated with the movies graph.
